@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from datetime import datetime
+from sklearn.neighbors import BallTree
 import sqlite3
+import numpy as np
 
 app = FastAPI()
 
