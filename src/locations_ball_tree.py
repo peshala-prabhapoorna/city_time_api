@@ -25,6 +25,8 @@ def ball_tree(db_cursor):
 
 def query_ball_tree(location, ball_tree):
     query_location = [location["latitude"], location["longitude"]]
+    # convert degrees to radians
+    query_location = np.deg2rad(query_location)
     query_location = np.array([query_location])
 
     distances, indices = ball_tree.query(query_location, k=1)
