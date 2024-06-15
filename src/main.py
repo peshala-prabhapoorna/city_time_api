@@ -56,3 +56,27 @@ async def nearest_city(location: Location):
             "timezone": city[2],
             "utcoffset": city[3],
             "distance": distance}
+
+@app.get("/gap/")
+async def time_difference(city_1: str, city_2: str):
+    # query database to find cities
+    query = "SELECT country, city, timezone, utcoffset \
+           FROM city_data \
+           WHERE city IN (?, ?);"
+    query_result = db_cursor.execute(query, (city_1, city_2))
+    cities = query_result.fetchall()
+
+    # if either of the cities are not found return None
+    if len(cities) !=2:
+        return None
+    
+    # calculate time gap
+    gap = 0
+    if cities[0][1] == city_1:
+        gap = cities[1][3] - cities[0][3]
+    else:
+        gap = cities[0][3] - cities[1][3]
+
+    return {"city_1": city_1,
+            "city_2": city_2,
+            "gap": gap}
