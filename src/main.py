@@ -4,6 +4,7 @@ import sqlite3
 import json
 
 from locations_ball_tree import ball_tree, query_ball_tree, Location
+from utilities import LocationEntry
 
 app = FastAPI()
 
@@ -26,8 +27,8 @@ async def root():
 @app.get("/tz/{city}")
 async def city_time(city: str):
     query = "SELECT country, city, timezone, utcoffset \
-            FROM city_data \
-            WHERE city=?;"
+        FROM city_data \
+        WHERE city=?;"
     query_result = db_cursor.execute(query, (city,))
     city_data = query_result.fetchone()
 
@@ -43,8 +44,8 @@ async def nearest_city(location: Location):
     
     # query database to find the city
     query = "SELECT country, city, timezone, utcoffset \
-            FROM city_data \
-            WHERE id=?;"
+        FROM city_data \
+        WHERE id=?;"
     query_result = db_cursor.execute(query, (int(db_id),))
     city = query_result.fetchone()
     
@@ -61,8 +62,8 @@ async def nearest_city(location: Location):
 async def time_difference(city_1: str, city_2: str):
     # query database to find cities
     query = "SELECT country, city, timezone, utcoffset \
-           FROM city_data \
-           WHERE city IN (?, ?);"
+       FROM city_data \
+       WHERE city IN (?, ?);"
     query_result = db_cursor.execute(query, (city_1, city_2))
     cities = query_result.fetchall()
 
@@ -80,3 +81,25 @@ async def time_difference(city_1: str, city_2: str):
     return {"city_1": city_1,
             "city_2": city_2,
             "gap": gap}
+
+@app.post("/add/")
+async def add_location(location: LocationEntry):
+    location = location.dict()
+    # insert location to table
+    entry = "INSERT INTO added_locations \
+                (country, city, name, latitude, longitude, description) \
+            VALUES (?, ?, ?, ?, ?, ?);"
+    values = (location["country"], location["city"], location["name"],
+                location["latitude"], location["longitude"], 
+                location["description"])
+    db_cursor.execute(entry, values)
+    db_connection.commit()
+    
+    # query the database to check the entry
+    query = "SELECT * FROM added_locations WHERE name = ?;"
+    query_result = db_cursor.execute(query, (location["name"],))
+    added_location = query_result.fetchone()
+
+    return {"country": added_location[1],
+            "city": added_location[2],
+            "name": added_location[3]}
