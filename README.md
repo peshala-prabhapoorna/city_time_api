@@ -1,5 +1,19 @@
 # city_time_api
 current time of cities around the world
+## running the API
+1. create and activate a virtual environment
+```bash
+virtualenv venv
+source venv/bin/activate # macOS and Linux
+```
+2. install dependencies
+```bash
+pip3 install -r requirements.txt
+```
+3. run the API (from project root)
+```bash
+fastapi dev src/main.py
+```
 ## routes
 1. GET - `/`  
 this route returns a JSON object with `time_format`, `hours`, `minutes`,  
